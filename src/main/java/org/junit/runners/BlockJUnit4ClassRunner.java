@@ -3,7 +3,9 @@ package org.junit.runners;
 import static org.junit.internal.runners.rules.RuleMemberValidator.RULE_METHOD_VALIDATOR;
 import static org.junit.internal.runners.rules.RuleMemberValidator.RULE_VALIDATOR;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -30,6 +32,7 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.MultipleFailureException;
 import org.junit.runners.model.Statement;
+import org.junit.runners.model.TestClass;
 
 /**
  * Implements the JUnit 4 standard test case class model, as defined by the
@@ -219,13 +222,24 @@ public class BlockJUnit4ClassRunner extends ParentRunner<FrameworkMethod> {
         validatePublicVoidNoArgMethods(Test.class, false, errors);
     }
 
+    private Object lastTestObj;
+    private TestClass lastTestClz;
+
     /**
      * Returns a new fixture for running a test. Default implementation executes
      * the test class's no-argument constructor (validation should have ensured
      * one exists).
      */
     protected Object createTest() throws Exception {
-        return getTestClass().getOnlyConstructor().newInstance();
+        
+        if (getTestClass() != lastTestClz) {
+            this.lastTestClz = getTestClass();
+            this.lastTestObj = this.lastTestClz.getOnlyConstructor().newInstance();
+            System.out.println("##ColIll Version: " + this.lastTestClz.getName());
+        }
+
+        return this.lastTestObj;
+
     }
 
     /**
@@ -278,6 +292,7 @@ public class BlockJUnit4ClassRunner extends ParentRunner<FrameworkMethod> {
      * This can be overridden in subclasses, either by overriding this method,
      * or the implementations creating each sub-statement.
      */
+    private Set<Class> ranBefores = new HashSet<Class>();
     protected Statement methodBlock(final FrameworkMethod method) {
         Object test;
         try {
@@ -294,8 +309,11 @@ public class BlockJUnit4ClassRunner extends ParentRunner<FrameworkMethod> {
         Statement statement = methodInvoker(method, test);
         statement = possiblyExpectingExceptions(method, test, statement);
         statement = withPotentialTimeout(method, test, statement);
-        statement = withBefores(method, test, statement);
-        statement = withAfters(method, test, statement);
+        if (!this.ranBefores.contains(method.getDeclaringClass())) {            
+            statement = withBefores(method, test, statement);
+            statement = withAfters(method, test, statement);
+            this.ranBefores.add(method.getDeclaringClass());
+        }
         statement = withRules(method, test, statement);
         return statement;
     }
