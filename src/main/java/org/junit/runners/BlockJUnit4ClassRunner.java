@@ -222,25 +222,6 @@ public class BlockJUnit4ClassRunner extends ParentRunner<FrameworkMethod> {
         validatePublicVoidNoArgMethods(Test.class, false, errors);
     }
 
-    private Object lastTestObj;
-    private TestClass lastTestClz;
-
-    /**
-     * Returns a new fixture for running a test. Default implementation executes
-     * the test class's no-argument constructor (validation should have ensured
-     * one exists).
-     */
-    protected Object createTest() throws Exception {
-        
-        if (getTestClass() != lastTestClz) {
-            this.lastTestClz = getTestClass();
-            this.lastTestObj = this.lastTestClz.getOnlyConstructor().newInstance();
-            System.out.println("##ColIll Version: " + this.lastTestClz.getName());
-        }
-
-        return this.lastTestObj;
-
-    }
 
     /**
      * Returns a new fixture to run a particular test {@code method} against.
@@ -292,7 +273,6 @@ public class BlockJUnit4ClassRunner extends ParentRunner<FrameworkMethod> {
      * This can be overridden in subclasses, either by overriding this method,
      * or the implementations creating each sub-statement.
      */
-    private Set<Class> ranBefores = new HashSet<Class>();
     protected Statement methodBlock(final FrameworkMethod method) {
         Object test;
         try {
@@ -309,11 +289,8 @@ public class BlockJUnit4ClassRunner extends ParentRunner<FrameworkMethod> {
         Statement statement = methodInvoker(method, test);
         statement = possiblyExpectingExceptions(method, test, statement);
         statement = withPotentialTimeout(method, test, statement);
-        if (!this.ranBefores.contains(method.getDeclaringClass())) {            
-            statement = withBefores(method, test, statement);
-            statement = withAfters(method, test, statement);
-            this.ranBefores.add(method.getDeclaringClass());
-        }
+        //statement = withBefores(method, test, statement);
+        //statement = withAfters(method, test, statement);
         statement = withRules(method, test, statement);
         return statement;
     }
