@@ -74,8 +74,8 @@ public abstract class ColIllParentRunner<T> extends ParentRunner<T> implements F
         try {
             Statement statement = childrenInvoker(notifier);
             if (!areAllChildrenIgnored()) {
-                statement = withBeforeClasses(statement);
                 statement = withBefores(statement, createTest());
+                statement = withBeforeClasses(statement);
                 statement = withAfters(statement, createTest());
                 statement = withAfterClasses(statement);
                 statement = withClassRules(statement);
