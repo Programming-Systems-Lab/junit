@@ -58,7 +58,7 @@ import org.junit.runners.model.TestClass;
  *
  * @since 4.5
  */
-public class BlockJUnit4ClassRunner extends ParentRunner<FrameworkMethod> {
+public class BlockJUnit4ClassRunner extends ColIllParentRunner<FrameworkMethod> {
 
     private final ConcurrentMap<FrameworkMethod, Description> methodDescriptions = new ConcurrentHashMap<FrameworkMethod, Description>();
 

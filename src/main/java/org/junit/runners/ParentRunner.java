@@ -15,8 +15,6 @@ import java.util.List;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -24,7 +22,6 @@ import org.junit.internal.AssumptionViolatedException;
 import org.junit.internal.runners.model.EachTestNotifier;
 import org.junit.internal.runners.statements.RunAfters;
 import org.junit.internal.runners.statements.RunBefores;
-import org.junit.internal.runners.statements.Fail;
 import org.junit.rules.RunRules;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -190,42 +187,14 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
      * @return {@code Statement}
      */
     protected Statement classBlock(final RunNotifier notifier) {
-        try {
-            Statement statement = childrenInvoker(notifier);
-            if (!areAllChildrenIgnored()) {
-                statement = withBeforeClasses(statement);
-                statement = withBefores(statement, createTest());
-                statement = withAfters(statement, createTest());
-                statement = withAfterClasses(statement);
-                statement = withClassRules(statement);
-            }
-            return statement;
-        } catch (Throwable e) {
-            return new Fail(e);
+        Statement statement = childrenInvoker(notifier);
+        if (!areAllChildrenIgnored()) {
+            statement = withBeforeClasses(statement);
+            statement = withAfterClasses(statement);
+            statement = withClassRules(statement);
         }
-
+        return statement;
     }
-
-    protected Object lastTestObj;
-    protected TestClass lastTestClz;
-
-    /**
-     * Returns a new fixture for running a test. Default implementation executes
-     * the test class's no-argument constructor (validation should have ensured
-     * one exists).
-     */
-    protected Object createTest() throws Exception {
-        
-        if (getTestClass() != lastTestClz) {
-            this.lastTestClz = getTestClass();
-            this.lastTestObj = this.lastTestClz.getOnlyConstructor().newInstance();
-            System.out.println("##ColIll Version: " + this.lastTestClz.getName());
-        }
-
-        return this.lastTestObj;
-
-    }
-
 
     private boolean areAllChildrenIgnored() {
         for (T child : getFilteredChildren()) {
@@ -234,20 +203,6 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
             }
         }
         return true;
-    }
-
-    protected Statement withBefores(Statement statement, Object target) {
-        List<FrameworkMethod> befores = getTestClass().getAnnotatedMethods(
-                Before.class);
-        return befores.isEmpty() ? statement : new RunBefores(statement,
-                befores, target);
-    }
-
-    protected Statement withAfters(Statement statement, Object target) {
-        List<FrameworkMethod> afters = getTestClass().getAnnotatedMethods(
-                After.class);
-        return afters.isEmpty() ? statement : new RunAfters(statement, afters,
-                target);
     }
 
     /**
@@ -285,7 +240,7 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
      * @return a RunRules statement if any class-level {@link Rule}s are
      *         found, or the base statement
      */
-    private Statement withClassRules(Statement statement) {
+    protected Statement withClassRules(Statement statement) {
         List<TestRule> classRules = classRules();
         return classRules.isEmpty() ? statement :
                 new RunRules(statement, classRules, getDescription());
@@ -464,7 +419,7 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
         }
     }
 
-    private Collection<T> getFilteredChildren() {
+    protected Collection<T> getFilteredChildren() {
         if (filteredChildren == null) {
             synchronized (childrenLock) {
                 if (filteredChildren == null) {
