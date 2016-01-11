@@ -227,7 +227,7 @@ public class BlockJUnit4ClassRunner extends ColIllParentRunner<FrameworkMethod> 
      * the test class's no-argument constructor (validation should have ensured
      * one exists).
      */
-    protected Object _createTest() throws Exception {
+    protected Object createTest() throws Exception {
         return getTestClass().getOnlyConstructor().newInstance();
     }
 
@@ -237,8 +237,11 @@ public class BlockJUnit4ClassRunner extends ColIllParentRunner<FrameworkMethod> 
      *
      * @since 4.13
      */
+    protected Object createTest0(FrameworkMethod method) throws Exception {
+        return createTest0();
+    }
     protected Object createTest(FrameworkMethod method) throws Exception {
-        return createTest();
+        return createTest0(method);
     }
 
     /**
@@ -287,7 +290,7 @@ public class BlockJUnit4ClassRunner extends ColIllParentRunner<FrameworkMethod> 
             test = new ReflectiveCallable() {
                 @Override
                 protected Object runReflectiveCall() throws Throwable {
-                    return createTest(method);
+                    return createTest0(method);
                 }
             }.run();
         } catch (Throwable e) {

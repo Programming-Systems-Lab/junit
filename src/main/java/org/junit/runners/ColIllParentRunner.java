@@ -68,17 +68,30 @@ public abstract class ColIllParentRunner<T> extends ParentRunner<T> implements F
         super(testClass);
 
     }
-
-
     @Override
-    protected final Statement classBlock(final RunNotifier notifier) {
+    public void run(final RunNotifier notifier) {
+        EachTestNotifier testNotifier = new EachTestNotifier(notifier,
+                getDescription());
+        try {
+            Statement statement = classBlock0(notifier);
+            statement.evaluate();
+        } catch (AssumptionViolatedException e) {
+            testNotifier.addFailedAssumption(e);
+        } catch (StoppedByUserException e) {
+            throw e;
+        } catch (Throwable e) {
+            testNotifier.addFailure(e);
+        }
+    }
+
+    protected final Statement classBlock0(final RunNotifier notifier) {
         try {
 //            System.out.println("Class block created");
-            Statement statement = childrenInvoker(notifier);
+            Statement statement = classBlock(notifier);
             if (!areAllChildrenIgnored()) {
-                statement = withBefores(statement, createTest());
+                statement = withBefores(statement, createTest0());
                 statement = withBeforeClasses(statement);
-                statement = withAfters(statement, createTest());
+                statement = withAfters(statement, createTest0());
                 statement = withAfterClasses(statement);
                 statement = withClassRules(statement);
             }
@@ -109,18 +122,18 @@ public abstract class ColIllParentRunner<T> extends ParentRunner<T> implements F
      * the test class's no-argument constructor (validation should have ensured
      * one exists).
      */
-    protected final Object createTest() throws Exception {
+    protected final Object createTest0() throws Exception {
         
         if (getTestClass() != lastTestClz) {
             this.lastTestClz = getTestClass();
-            this.lastTestObj = _createTest();
+            this.lastTestObj = createTest();
             System.out.println("##ColIll Version: " + this.lastTestClz.getName());
         }
 
         return this.lastTestObj;
     }
     
-    protected abstract Object _createTest() throws Exception;
+    protected abstract Object createTest() throws Exception;
     
 
     protected Statement withBefores(Statement statement, Object target) {
