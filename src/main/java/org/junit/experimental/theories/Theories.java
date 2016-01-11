@@ -248,7 +248,7 @@ public class Theories extends BlockJUnit4ClassRunner {
                 }
 
                 @Override
-                public Object createTest() throws Exception {
+                public Object _createTest() throws Exception {
                     Object[] params = complete.getConstructorArguments();
                     
                     if (!nullsOk()) {

@@ -70,8 +70,10 @@ public abstract class ColIllParentRunner<T> extends ParentRunner<T> implements F
     }
 
 
-    protected Statement classBlock(final RunNotifier notifier) {
+    @Override
+    protected final Statement classBlock(final RunNotifier notifier) {
         try {
+//            System.out.println("Class block created");
             Statement statement = childrenInvoker(notifier);
             if (!areAllChildrenIgnored()) {
                 statement = withBefores(statement, createTest());
@@ -107,17 +109,19 @@ public abstract class ColIllParentRunner<T> extends ParentRunner<T> implements F
      * the test class's no-argument constructor (validation should have ensured
      * one exists).
      */
-    protected Object createTest() throws Exception {
+    protected final Object createTest() throws Exception {
         
         if (getTestClass() != lastTestClz) {
             this.lastTestClz = getTestClass();
-            this.lastTestObj = this.lastTestClz.getOnlyConstructor().newInstance();
+            this.lastTestObj = _createTest();
             System.out.println("##ColIll Version: " + this.lastTestClz.getName());
         }
 
         return this.lastTestObj;
-
     }
+    
+    protected abstract Object _createTest() throws Exception;
+    
 
     protected Statement withBefores(Statement statement, Object target) {
         List<FrameworkMethod> befores = getTestClass().getAnnotatedMethods(

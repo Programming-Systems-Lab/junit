@@ -36,7 +36,7 @@ public class BlockJUnit4ClassRunnerWithParameters extends
     }
 
     @Override
-    public Object createTest() throws Exception {
+    public Object _createTest() throws Exception {
         InjectionType injectionType = getInjectionType();
         switch (injectionType) {
             case CONSTRUCTOR:
@@ -133,10 +133,10 @@ public class BlockJUnit4ClassRunnerWithParameters extends
         }
     }
 
-    @Override
-    protected Statement classBlock(RunNotifier notifier) {
-        return childrenInvoker(notifier);
-    }
+//    @Override
+//    protected Statement classBlock(RunNotifier notifier) {
+//        return childrenInvoker(notifier);
+//    }
 
     @Override
     protected Annotation[] getRunnerAnnotations() {

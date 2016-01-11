@@ -222,6 +222,14 @@ public class BlockJUnit4ClassRunner extends ColIllParentRunner<FrameworkMethod> 
         validatePublicVoidNoArgMethods(Test.class, false, errors);
     }
 
+    /**
+     * Returns a new fixture for running a test. Default implementation executes
+     * the test class's no-argument constructor (validation should have ensured
+     * one exists).
+     */
+    protected Object _createTest() throws Exception {
+        return getTestClass().getOnlyConstructor().newInstance();
+    }
 
     /**
      * Returns a new fixture to run a particular test {@code method} against.
